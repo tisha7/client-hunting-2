@@ -12,15 +12,21 @@ type LeadForm = {
   city: string;
   niche: string;
   business_type: string;
+  service: string;
+  landing_page: string;
+  main_problem: string;
   decision_maker: string;
-  role: string;
-  email: string;
+  owner_email: string;
   phone: string;
+  social_media: string;
+  owner_linkedin: string;
+  company_linkedin: string;
+  company_email: string;
+  screenshot_url: string;
   lead_score: string;
   priority: string;
   status: string;
   follow_up_date: string;
-  service_opportunity: string;
   research_notes: string;
 };
 
@@ -31,15 +37,21 @@ const emptyLead: LeadForm = {
   city: "",
   niche: "",
   business_type: "",
+  service: "",
+  landing_page: "",
+  main_problem: "",
   decision_maker: "",
-  role: "",
-  email: "",
+  owner_email: "",
   phone: "",
+  social_media: "",
+  owner_linkedin: "",
+  company_linkedin: "",
+  company_email: "",
+  screenshot_url: "",
   lead_score: "0",
   priority: "Low",
   status: "New",
   follow_up_date: "",
-  service_opportunity: "",
   research_notes: "",
 };
 
@@ -47,16 +59,20 @@ export default function EditLeadPage() {
   const params = useParams();
   const router = useRouter();
 
+  const leadId = params.id as string;
+
   const [form, setForm] = useState<LeadForm>(emptyLead);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function loadLead() {
+      setLoading(true);
+
       const { data, error } = await supabase
         .from("leads")
         .select("*")
-        .eq("id", params.id)
+        .eq("id", leadId)
         .single();
 
       if (error) {
@@ -72,23 +88,31 @@ export default function EditLeadPage() {
         city: data.city ?? "",
         niche: data.niche ?? "",
         business_type: data.business_type ?? "",
+        service: data.service ?? "",
+        landing_page: data.landing_page ?? "",
+        main_problem: data.main_problem ?? "",
         decision_maker: data.decision_maker ?? "",
-        role: data.role ?? "",
-        email: data.email ?? "",
+        owner_email: data.owner_email ?? "",
         phone: data.phone ?? "",
+        social_media: data.social_media ?? "",
+        owner_linkedin: data.owner_linkedin ?? "",
+        company_linkedin: data.company_linkedin ?? "",
+        company_email: data.company_email ?? "",
+        screenshot_url: data.screenshot_url ?? "",
         lead_score: String(data.lead_score ?? 0),
         priority: data.priority ?? "Low",
         status: data.status ?? "New",
         follow_up_date: data.follow_up_date ?? "",
-        service_opportunity: data.service_opportunity ?? "",
         research_notes: data.research_notes ?? "",
       });
 
       setLoading(false);
     }
 
-    loadLead();
-  }, [params.id]);
+    if (leadId) {
+      loadLead();
+    }
+  }, [leadId]);
 
   function updateField(name: keyof LeadForm, value: string) {
     setForm((current) => ({
@@ -111,18 +135,24 @@ export default function EditLeadPage() {
         city: form.city || null,
         niche: form.niche || null,
         business_type: form.business_type || null,
+        service: form.service || null,
+        landing_page: form.landing_page || null,
+        main_problem: form.main_problem || null,
         decision_maker: form.decision_maker || null,
-        role: form.role || null,
-        email: form.email || null,
+        owner_email: form.owner_email || null,
         phone: form.phone || null,
+        social_media: form.social_media || null,
+        owner_linkedin: form.owner_linkedin || null,
+        company_linkedin: form.company_linkedin || null,
+        company_email: form.company_email || null,
+        screenshot_url: form.screenshot_url || null,
         lead_score: Number(form.lead_score) || 0,
         priority: form.priority,
         status: form.status,
         follow_up_date: form.follow_up_date || null,
-        service_opportunity: form.service_opportunity || null,
         research_notes: form.research_notes || null,
       })
-      .eq("id", params.id);
+      .eq("id", leadId);
 
     if (error) {
       alert("Failed to update lead: " + error.message);
@@ -130,7 +160,7 @@ export default function EditLeadPage() {
       return;
     }
 
-    router.push(`/leads/${params.id}`);
+    router.push(`/leads/${leadId}`);
   }
 
   if (loading) {
@@ -143,10 +173,10 @@ export default function EditLeadPage() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-4xl p-6 md:p-10">
+      <div className="mx-auto max-w-5xl p-6 md:p-10">
 
         <Link
-          href={`/leads/${params.id}`}
+          href={`/leads/${leadId}`}
           className="text-sm text-slate-400 hover:text-white"
         >
           ← Back to Lead Details
@@ -160,6 +190,10 @@ export default function EditLeadPage() {
           <h1 className="mt-2 text-3xl font-bold">
             ✏️ Edit Lead
           </h1>
+
+          <p className="mt-2 text-slate-400">
+            Update business, contact, research, and outreach information.
+          </p>
         </div>
 
         <form
@@ -177,38 +211,51 @@ export default function EditLeadPage() {
               <Input
                 label="Company Name"
                 value={form.company_name}
-                onChange={(value) => updateField("company_name", value)}
+                onChange={(value) =>
+                  updateField("company_name", value)
+                }
                 required
               />
 
               <Input
                 label="Website"
+                type="url"
                 value={form.website}
-                onChange={(value) => updateField("website", value)}
+                onChange={(value) =>
+                  updateField("website", value)
+                }
               />
 
               <Input
                 label="Country"
                 value={form.country}
-                onChange={(value) => updateField("country", value)}
+                onChange={(value) =>
+                  updateField("country", value)
+                }
               />
 
               <Input
                 label="City"
                 value={form.city}
-                onChange={(value) => updateField("city", value)}
+                onChange={(value) =>
+                  updateField("city", value)
+                }
               />
 
               <Input
                 label="Niche"
                 value={form.niche}
-                onChange={(value) => updateField("niche", value)}
+                onChange={(value) =>
+                  updateField("niche", value)
+                }
               />
 
               <Input
                 label="Business Type"
                 value={form.business_type}
-                onChange={(value) => updateField("business_type", value)}
+                onChange={(value) =>
+                  updateField("business_type", value)
+                }
               />
 
             </div>
@@ -224,73 +271,90 @@ export default function EditLeadPage() {
               <Input
                 label="Decision Maker"
                 value={form.decision_maker}
-                onChange={(value) => updateField("decision_maker", value)}
+                onChange={(value) =>
+                  updateField("decision_maker", value)
+                }
               />
 
               <Input
-                label="Role"
-                value={form.role}
-                onChange={(value) => updateField("role", value)}
-              />
-
-              <Input
-                label="Email"
+                label="Owner Email"
                 type="email"
-                value={form.email}
-                onChange={(value) => updateField("email", value)}
+                value={form.owner_email}
+                onChange={(value) =>
+                  updateField("owner_email", value)
+                }
+              />
+
+              <Input
+                label="Company Email"
+                type="email"
+                value={form.company_email}
+                onChange={(value) =>
+                  updateField("company_email", value)
+                }
               />
 
               <Input
                 label="Phone"
                 value={form.phone}
-                onChange={(value) => updateField("phone", value)}
-              />
-
-            </div>
-          </section>
-
-          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-lg font-semibold">
-              📊 Lead Management
-            </h2>
-
-            <div className="mt-6 grid gap-5 md:grid-cols-3">
-
-              <Input
-                label="Lead Score"
-                type="number"
-                value={form.lead_score}
-                onChange={(value) => updateField("lead_score", value)}
-              />
-
-              <Select
-                label="Priority"
-                value={form.priority}
-                onChange={(value) => updateField("priority", value)}
-                options={["Low", "Warm", "Hot"]}
-              />
-
-              <Input
-                label="Follow-up Date"
-                type="date"
-                value={form.follow_up_date}
                 onChange={(value) =>
-                  updateField("follow_up_date", value)
+                  updateField("phone", value)
                 }
               />
 
-              <Select
-                label="Status"
-                value={form.status}
-                onChange={(value) => updateField("status", value)}
-                options={[
-                  "New",
-                  "Contacted",
-                  "Follow-up",
-                  "Qualified",
-                  "Won",
-                  "Lost",
-                ]}
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+            <h2 className="text-lg font-semibold">
+              🔗 Online Presence
+            </h2>
+
+            <div className="mt-6 grid gap-5 md:grid-cols-2">
+
+              <Input
+                label="Landing Page"
+                type="url"
+                value={form.landing_page}
+                onChange={(value) =>
+                  updateField("landing_page", value)
+                }
+              />
+
+              <Input
+                label="Social Media"
+                type="url"
+                value={form.social_media}
+                onChange={(value) =>
+                  updateField("social_media", value)
+                }
+              />
+
+              <Input
+                label="Owner LinkedIn"
+                type="url"
+                value={form.owner_linkedin}
+                onChange={(value) =>
+                  updateField("owner_linkedin", value)
+                }
+              />
+
+              <Input
+                label="Company LinkedIn"
+                type="url"
+                value={form.company_linkedin}
+                onChange={(value) =>
+                  updateField("company_linkedin", value)
+                }
+              />
+
+              <Input
+                label="Screenshot URL"
+                type="url"
+                value={form.screenshot_url}
+                onChange={(value) =>
+                  updateField("screenshot_url", value)
+                }
               />
 
             </div>
@@ -298,16 +362,24 @@ export default function EditLeadPage() {
 
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="text-lg font-semibold">
-              💼 Opportunity & Notes
+              🔎 Research Insights
             </h2>
 
             <div className="mt-6 space-y-5">
 
               <Textarea
-                label="Service Opportunity"
-                value={form.service_opportunity}
+                label="Main Problem"
+                value={form.main_problem}
                 onChange={(value) =>
-                  updateField("service_opportunity", value)
+                  updateField("main_problem", value)
+                }
+              />
+
+              <Textarea
+                label="Recommended Service"
+                value={form.service}
+                onChange={(value) =>
+                  updateField("service", value)
                 }
               />
 
@@ -322,10 +394,63 @@ export default function EditLeadPage() {
             </div>
           </section>
 
+          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+            <h2 className="text-lg font-semibold">
+              📊 Lead Management
+            </h2>
+
+            <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+
+              <Input
+                label="Lead Score"
+                type="number"
+                value={form.lead_score}
+                onChange={(value) =>
+                  updateField("lead_score", value)
+                }
+              />
+
+              <Select
+                label="Priority"
+                value={form.priority}
+                onChange={(value) =>
+                  updateField("priority", value)
+                }
+                options={["Low", "Warm", "Hot"]}
+              />
+
+              <Select
+                label="Status"
+                value={form.status}
+                onChange={(value) =>
+                  updateField("status", value)
+                }
+                options={[
+                  "New",
+                  "Contacted",
+                  "Follow-up",
+                  "Qualified",
+                  "Won",
+                  "Lost",
+                ]}
+              />
+
+              <Input
+                label="Follow-up Date"
+                type="date"
+                value={form.follow_up_date}
+                onChange={(value) =>
+                  updateField("follow_up_date", value)
+                }
+              />
+
+            </div>
+          </section>
+
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
 
             <Link
-              href={`/leads/${params.id}`}
+              href={`/leads/${leadId}`}
               className="rounded-lg border border-slate-700 px-6 py-3 text-center hover:bg-slate-800"
             >
               Cancel
@@ -334,9 +459,9 @@ export default function EditLeadPage() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-blue-600 px-6 py-3 font-medium hover:bg-blue-500 disabled:opacity-50"
+              className="rounded-lg bg-blue-600 px-6 py-3 font-medium hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? "Saving..." : "💾 Save Changes"}
             </button>
 
           </div>
@@ -371,7 +496,9 @@ function Input({
         type={type}
         required={required}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
         className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"
       />
     </label>
@@ -397,7 +524,9 @@ function Select({
 
       <select
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
         className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"
       >
         {options.map((option) => (
@@ -428,7 +557,9 @@ function Textarea({
       <textarea
         rows={5}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
         className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"
       />
     </label>
