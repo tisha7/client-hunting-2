@@ -589,7 +589,10 @@ ${aiResult.nextAction || ""}`;
   }
 
   async function analyzeWithAI() {
-    if (!lead) return;
+    if (!lead) {
+      setAiError("Lead data is not loaded.");
+      return;
+    }
 
     setAiLoading(true);
     setAiError("");
@@ -603,28 +606,20 @@ ${aiResult.nextAction || ""}`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          company_name: lead.company_name,
-          website: lead.website,
-          niche: lead.niche,
-          city: lead.city,
-          country: lead.country,
-          lead_score: lead.lead_score,
-          priority: lead.priority,
-          status: lead.status,
-          service_opportunity: lead.service_opportunity,
-          research_notes: lead.research_notes,
+          action: "analyze",
+          lead: lead,
         }),
       });
 
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!response.ok) {
         throw new Error(
           data.error || "Failed to analyze lead."
         );
       }
 
-      setAiResult(data.analysis);
+      setAiResult(data);
     } catch (error) {
       setAiError(
         error instanceof Error

@@ -19,6 +19,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    console.log("AI REQUEST BODY:", JSON.stringify(body, null, 2));
+
     const { action = "analyze", lead } = body;
 
     if (!lead) {
@@ -104,7 +106,7 @@ Return this exact JSON structure:
     }
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.6-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
