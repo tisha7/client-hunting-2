@@ -13,14 +13,20 @@ type Lead = {
   city: string | null;
   niche: string | null;
   business_type: string | null;
+  service: string | null;
+  landing_page: string | null;
+  main_problem: string | null;
   decision_maker: string | null;
-  role: string | null;
-  email: string | null;
+  owner_email: string | null;
   phone: string | null;
+  social_media: string | null;
+  owner_linkedin: string | null;
+  company_linkedin: string | null;
+  company_email: string | null;
+  screenshot_url: string | null;
   lead_score: number | null;
   priority: string | null;
   status: string | null;
-  service_opportunity: string | null;
   research_notes: string | null;
   follow_up_date: string | null;
   created_at: string | null;
@@ -718,21 +724,65 @@ ${aiResult.nextAction || ""}`;
               />
 
               <Info
+                label="Service"
+                value={lead.service}
+              />
+
+              <Info
+                label="Landing Page"
+                value={lead.landing_page}
+                link
+              />
+
+              <Info
+                label="Main Problem"
+                value={lead.main_problem}
+              />
+
+              <Info
                 label="Decision Maker"
                 value={lead.decision_maker}
               />
 
-              <Info label="Role" value={lead.role} />
+              <Info
+                label="Owner Email"
+                value={lead.owner_email}
+                email
+              />
 
               <Info
-                label="Email"
-                value={lead.email}
+                label="Company Email"
+                value={lead.company_email}
                 email
               />
 
               <Info
                 label="Phone"
                 value={lead.phone}
+              />
+
+              <Info
+                label="Social Media"
+                value={lead.social_media}
+                link
+              />
+
+              <Info
+                label="Owner LinkedIn"
+                value={lead.owner_linkedin}
+                link
+              />
+
+              <Info
+                label="Company LinkedIn"
+                value={lead.company_linkedin}
+                link
+              />
+
+              <Info
+                label="Screenshot"
+                value={lead.screenshot_url}
+                link
               />
 
               <Info
@@ -783,17 +833,38 @@ ${aiResult.nextAction || ""}`;
 
         </div>
 
-        {/* Opportunity */}
+        {/* Research Insights */}
         <section className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
 
           <h2 className="text-xl font-bold">
-            Service Opportunity
+            🔎 Research Insights
           </h2>
 
-          <p className="mt-4 whitespace-pre-wrap text-slate-300">
-            {lead.service_opportunity ||
-              "No service opportunity added yet."}
-          </p>
+          <div className="mt-5 grid gap-6 md:grid-cols-2">
+
+            <div>
+              <p className="text-sm text-slate-400">
+                Main Problem
+              </p>
+
+              <p className="mt-2 whitespace-pre-wrap text-slate-300">
+                {lead.main_problem ||
+                  "No main problem added yet."}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-slate-400">
+                Recommended Service
+              </p>
+
+              <p className="mt-2 whitespace-pre-wrap text-slate-300">
+                {lead.service ||
+                  "No service information added yet."}
+              </p>
+            </div>
+
+          </div>
 
         </section>
 
