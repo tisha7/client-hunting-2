@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { calculateLeadPriority } from "@/lib/lead-scoring";
+import { normalizeLeadStatus } from "@/lib/lead-status";
 
 type Lead = {
   id: string;
@@ -113,7 +114,7 @@ export default function LeadsPage() {
 
     if (statusFilter !== "all") {
       result = result.filter(
-        (lead) => (lead.status || "New") === statusFilter
+        (lead) => normalizeLeadStatus(lead.status) === statusFilter
       );
     }
 
