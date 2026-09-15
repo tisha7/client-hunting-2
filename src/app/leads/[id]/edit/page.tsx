@@ -69,6 +69,9 @@ export default function EditLeadPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const liveScore = calculateLeadScore(form);
+  const livePriority = calculateLeadPriority(liveScore);
+
   useEffect(() => {
     async function loadLead() {
       setLoading(true);
@@ -209,6 +212,29 @@ export default function EditLeadPage() {
         >
 
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+            <div className="mb-6 rounded-lg border border-slate-700 bg-slate-950 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm text-slate-400">Live Lead Score</p>
+                  <p className="mt-1 text-2xl font-bold">{liveScore}/100</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-slate-400">Priority</p>
+                  <p className="mt-1 text-lg font-semibold">
+                    {livePriority === "Hot" && "🔥 "}
+                    {livePriority === "Warm" && "🟡 "}
+                    {livePriority === "Low" && "🔵 "}
+                    {livePriority}
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-3 text-xs text-slate-500">
+                Score and priority update automatically as you edit lead data.
+              </p>
+            </div>
+
             <h2 className="text-lg font-semibold">
               🏢 Business Information
             </h2>
