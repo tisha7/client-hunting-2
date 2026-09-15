@@ -4,6 +4,10 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import {
+  calculateLeadScore,
+  calculateLeadPriority,
+} from "@/lib/lead-scoring";
 
 type LeadForm = {
   company_name: string;
@@ -126,6 +130,9 @@ export default function EditLeadPage() {
 
     setSaving(true);
 
+    const calculatedScore = calculateLeadScore(form);
+    const calculatedPriority = calculateLeadPriority(calculatedScore);
+
     const { error } = await supabase
       .from("leads")
       .update({
@@ -146,8 +153,8 @@ export default function EditLeadPage() {
         company_linkedin: form.company_linkedin || null,
         company_email: form.company_email || null,
         screenshot_url: form.screenshot_url || null,
-        lead_score: Number(form.lead_score) || 0,
-        priority: form.priority,
+        lead_score: calculatedScore,
+        priority: calculatedPriority,
         status: form.status,
         follow_up_date: form.follow_up_date || null,
         research_notes: form.research_notes || null,
