@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { calculateLeadPriority } from "@/lib/lead-scoring";
 
 type Lead = {
   id: string;
   company_name: string;
   city: string | null;
   country: string | null;
+  lead_score: number | null;
   priority: string | null;
   status: string | null;
   follow_up_date: string | null;
@@ -43,7 +45,7 @@ export default function FollowUpsPage() {
     const { data, error } = await supabase
       .from("leads")
       .select(
-        "id, company_name, city, country, priority, status, follow_up_date"
+        "id, company_name, city, country, lead_score, priority, status, follow_up_date"
       )
       .not("follow_up_date", "is", null)
       .order("follow_up_date", {
@@ -73,11 +75,15 @@ export default function FollowUpsPage() {
     setCompletingId(lead.id);
     setErrorMessage("");
 
-    // Schedule the next follow-up based on lead priority.
+    // Schedule the next follow-up based on the calculated priority.
+    const calculatedPriority = calculateLeadPriority(
+      Number(lead.lead_score) || 0
+    );
+
     const followUpDays =
-      lead.priority === "Hot"
+      calculatedPriority === "Hot"
         ? 2
-        : lead.priority === "Warm"
+        : calculatedPriority === "Warm"
           ? 4
           : 7;
 
@@ -94,7 +100,6 @@ export default function FollowUpsPage() {
       .from("leads")
       .update({
         follow_up_date: nextFollowUpDate,
-        status: "Contacted",
       })
       .eq("id", lead.id);
 
@@ -124,7 +129,6 @@ export default function FollowUpsPage() {
           ? {
               ...item,
               follow_up_date: nextFollowUpDate,
-              status: "Contacted",
             }
           : item
       )
