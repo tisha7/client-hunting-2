@@ -73,9 +73,18 @@ export default function FollowUpsPage() {
     setCompletingId(lead.id);
     setErrorMessage("");
 
-    // Automatically schedule the next follow-up 3 days from today.
+    // Schedule the next follow-up based on lead priority.
+    const followUpDays =
+      lead.priority === "Hot"
+        ? 2
+        : lead.priority === "Warm"
+          ? 4
+          : 7;
+
     const nextFollowUp = new Date();
-    nextFollowUp.setDate(nextFollowUp.getDate() + 3);
+    nextFollowUp.setDate(
+      nextFollowUp.getDate() + followUpDays
+    );
 
     const nextFollowUpDate = nextFollowUp
       .toISOString()
@@ -100,7 +109,7 @@ export default function FollowUpsPage() {
       .insert({
         lead_id: lead.id,
         activity_type: "Follow-up Completed",
-        note: `Follow-up completed. Next follow-up scheduled for ${nextFollowUpDate}.`,
+        note: `Follow-up completed. Next follow-up scheduled for ${nextFollowUpDate} (${followUpDays} days based on ${lead.priority || "Low"} priority).`,
       });
 
     if (activityError) {

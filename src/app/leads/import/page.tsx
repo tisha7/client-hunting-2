@@ -4,6 +4,10 @@ import { ChangeEvent, useState } from "react";
 import Link from "next/link";
 import Papa from "papaparse";
 import { supabase } from "@/lib/supabase";
+import {
+  calculateLeadScore,
+  calculateLeadPriority,
+} from "@/lib/lead-scoring";
 
 type Lead = {
   company_name: string;
@@ -28,12 +32,6 @@ type Lead = {
   status: string;
   research_notes?: string | null;
 };
-
-function getPriority(score: number) {
-  if (score >= 17) return "Hot";
-  if (score >= 13) return "Warm";
-  return "Low";
-}
 
 function normalizeKey(key: string) {
   return key
@@ -102,21 +100,7 @@ export default function ImportLeadsPage() {
 
             if (!companyName) return null;
 
-            const scoreValue = getValue(row, [
-              "lead_score",
-              "score",
-            ]);
-
-            const parsedScore = Number.parseInt(
-              scoreValue,
-              10
-            );
-
-            const leadScore = Number.isNaN(parsedScore)
-              ? 0
-              : parsedScore;
-
-            return {
+            const importedLead: Omit<Lead, "priority"> = {
               company_name: companyName,
 
               city: getValue(row, [
@@ -210,11 +194,63 @@ export default function ImportLeadsPage() {
                 "image",
               ]) || null,
 
-              lead_score: leadScore,
-
-              priority:
-                getValue(row, ["priority"]) ||
-                getPriority(leadScore),
+              lead_score: calculateLeadScore({
+                website: getValue(row, ["website", "url", "web"]) || null,
+                landing_page: getValue(row, [
+                  "landing_page",
+                  "landingpage",
+                  "page",
+                ]) || null,
+                decision_maker: getValue(row, [
+                  "owner",
+                  "decision_maker",
+                  "contact_name",
+                ]) || null,
+                owner_email: getValue(row, [
+                  "owner_email",
+                  "decision_maker_email",
+                ]) || null,
+                phone: getValue(row, [
+                  "phone",
+                  "phone_number",
+                  "telephone",
+                ]) || null,
+                social_media: getValue(row, [
+                  "other_social_media_link",
+                  "social_media",
+                  "social",
+                ]) || null,
+                owner_linkedin: getValue(row, [
+                  "owner_linkedin",
+                  "owner_linkedin_url",
+                  "decision_maker_linkedin",
+                ]) || null,
+                company_linkedin: getValue(row, [
+                  "company_linkedin",
+                  "company_linkedin_url",
+                ]) || null,
+                company_email: getValue(row, [
+                  "company_email",
+                  "email",
+                  "business_email",
+                ]) || null,
+                main_problem: getValue(row, [
+                  "main_problem",
+                  "problem",
+                  "issue",
+                ]) || null,
+                service: getValue(row, [
+                  "service",
+                  "service_offer",
+                  "offer",
+                ]) || null,
+                research_notes: getValue(row, [
+                  "research_notes",
+                  "notes",
+                  "note",
+                  "description",
+                ]) || null,
+              }),
 
               status:
                 getValue(row, ["status"]) ||
@@ -226,6 +262,11 @@ export default function ImportLeadsPage() {
                 "note",
                 "description",
               ]) || null,
+            };
+
+            return {
+              ...importedLead,
+              priority: calculateLeadPriority(importedLead.lead_score),
             };
           })
           .filter(
