@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import {
+  LEAD_STATUSES,
+  normalizeLeadStatus,
+} from "@/lib/lead-status";
 
 type Lead = {
   id: string;
@@ -13,14 +17,7 @@ type Lead = {
   lead_score: number | null;
 };
 
-const columns = [
-  "New",
-  "Contacted",
-  "Follow-up",
-  "Interested",
-  "Client Won",
-  "Lost",
-];
+const columns = LEAD_STATUSES;
 
 export default function PipelinePage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -124,13 +121,11 @@ export default function PipelinePage() {
 
         {/* Pipeline */}
         <div className="overflow-x-auto">
-          <div className="grid min-w-[1200px] grid-cols-6 gap-4">
+          <div className="grid min-w-[1400px] grid-cols-7 gap-4">
 
             {columns.map((column) => {
               const columnLeads = leads.filter(
-                (lead) =>
-                  (lead.status || "New").toLowerCase() ===
-                  column.toLowerCase()
+                (lead) => normalizeLeadStatus(lead.status) === column
               );
 
               return (
