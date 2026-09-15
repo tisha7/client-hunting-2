@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import {
+  LEAD_STATUSES,
+  normalizeLeadStatus,
+} from "@/lib/lead-status";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -84,21 +88,14 @@ export default async function Home() {
     )
     .slice(0, 5);
 
-  const statuses = [
-    "New",
-    "Contacted",
-    "Replied",
-    "Interested",
-    "Proposal Sent",
-    "Won",
-  ];
+  const statuses = LEAD_STATUSES;
 
   const statusCounts = statuses.map(
     (status) => ({
       status,
       count: leads.filter(
         (lead) =>
-          (lead.status || "New") === status
+          normalizeLeadStatus(lead.status) === status
       ).length,
     })
   );
