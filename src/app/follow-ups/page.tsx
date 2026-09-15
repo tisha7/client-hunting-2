@@ -73,10 +73,18 @@ export default function FollowUpsPage() {
     setCompletingId(lead.id);
     setErrorMessage("");
 
+    // Automatically schedule the next follow-up 3 days from today.
+    const nextFollowUp = new Date();
+    nextFollowUp.setDate(nextFollowUp.getDate() + 3);
+
+    const nextFollowUpDate = nextFollowUp
+      .toISOString()
+      .split("T")[0];
+
     const { error: leadError } = await supabase
       .from("leads")
       .update({
-        follow_up_date: null,
+        follow_up_date: nextFollowUpDate,
         status: "Contacted",
       })
       .eq("id", lead.id);
@@ -92,7 +100,7 @@ export default function FollowUpsPage() {
       .insert({
         lead_id: lead.id,
         activity_type: "Follow-up Completed",
-        note: "Follow-up marked as completed from Follow-ups page.",
+        note: `Follow-up completed. Next follow-up scheduled for ${nextFollowUpDate}.`,
       });
 
     if (activityError) {
@@ -102,7 +110,15 @@ export default function FollowUpsPage() {
     }
 
     setLeads((current) =>
-      current.filter((item) => item.id !== lead.id)
+      current.map((item) =>
+        item.id === lead.id
+          ? {
+              ...item,
+              follow_up_date: nextFollowUpDate,
+              status: "Contacted",
+            }
+          : item
+      )
     );
 
     setCompletingId(null);
