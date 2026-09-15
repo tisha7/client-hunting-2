@@ -40,16 +40,27 @@ export async function POST(request: Request) {
     const leadContext = `
 Company: ${lead.company_name || "Unknown"}
 Website: ${lead.website || "Unknown"}
+Landing Page: ${lead.landing_page || "Unknown"}
 City: ${lead.city || "Unknown"}
 Country: ${lead.country || "Unknown"}
 Niche: ${lead.niche || "Unknown"}
 Business Type: ${lead.business_type || "Unknown"}
+
 Decision Maker: ${lead.decision_maker || "Unknown"}
-Role: ${lead.role || "Unknown"}
-Email: ${lead.email || "Unknown"}
-Service Opportunity: ${lead.service_opportunity || "Unknown"}
+Owner Email: ${lead.owner_email || "Unknown"}
+Phone: ${lead.phone || "Unknown"}
+Company Email: ${lead.company_email || "Unknown"}
+
+Social Media: ${lead.social_media || "Unknown"}
+Owner LinkedIn: ${lead.owner_linkedin || "Unknown"}
+Company LinkedIn: ${lead.company_linkedin || "Unknown"}
+
+Service: ${lead.service || "Unknown"}
+Main Problem: ${lead.main_problem || "Unknown"}
+Screenshot URL: ${lead.screenshot_url || "Unknown"}
 Research Notes: ${lead.research_notes || "Unknown"}
-Lead Score: ${lead.lead_score || 0}
+
+Lead Score: ${lead.lead_score ?? 0}
 Priority: ${lead.priority || "Unknown"}
 Status: ${lead.status || "Unknown"}
 `;
@@ -82,6 +93,8 @@ Return this exact JSON structure:
       prompt = `You are an expert B2B sales strategist.
 
 Analyze this sales lead and provide actionable outreach recommendations.
+
+Prioritize the lead's main problem, service opportunity, website/landing-page information, decision maker information, and research notes when forming recommendations.
 
 IMPORTANT:
 - Use only the information provided.
