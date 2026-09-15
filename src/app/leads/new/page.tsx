@@ -3,10 +3,30 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import {
+  calculateLeadScore,
+  calculateLeadPriority,
+} from "@/lib/lead-scoring";
 
 export default function NewLeadPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [formValues, setFormValues] = useState<Record<string, string>>({});
+
+  const liveScore = calculateLeadScore(formValues);
+  const livePriority = calculateLeadPriority(liveScore);
+
+  function handleFormChange(event: React.FormEvent<HTMLFormElement>) {
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const values: Record<string, string> = {};
+
+    data.forEach((value, key) => {
+      values[key] = String(value);
+    });
+
+    setFormValues(values);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -24,16 +44,50 @@ export default function NewLeadPage() {
       niche: formData.get("niche") as string,
       business_type: formData.get("business_type") as string,
       decision_maker: formData.get("decision_maker") as string,
-      role: formData.get("role") as string,
-      email: formData.get("email") as string,
+      owner_email: formData.get("owner_email") as string,
       phone: formData.get("phone") as string,
-      lead_score: Number(formData.get("lead_score")) || 0,
-      priority: formData.get("priority") as string,
-      status: formData.get("status") as string,
+      social_media: formData.get("social_media") as string,
+      owner_linkedin: formData.get("owner_linkedin") as string,
+      company_linkedin: formData.get("company_linkedin") as string,
+      company_email: formData.get("company_email") as string,
+      screenshot_url: formData.get("screenshot_url") as string,
+      service: formData.get("service") as string,
+      landing_page: formData.get("landing_page") as string,
+      main_problem: formData.get("main_problem") as string,
+      research_notes: formData.get("research_notes") as string,
+      lead_score: calculateLeadScore({
+        website: formData.get("website") as string,
+        landing_page: formData.get("landing_page") as string,
+        decision_maker: formData.get("decision_maker") as string,
+        owner_email: formData.get("owner_email") as string,
+        phone: formData.get("phone") as string,
+        social_media: formData.get("social_media") as string,
+        owner_linkedin: formData.get("owner_linkedin") as string,
+        company_linkedin: formData.get("company_linkedin") as string,
+        company_email: formData.get("company_email") as string,
+        main_problem: formData.get("main_problem") as string,
+        service: formData.get("service") as string,
+        research_notes: formData.get("research_notes") as string,
+      }),
+      priority: calculateLeadPriority(
+        calculateLeadScore({
+          website: formData.get("website") as string,
+          landing_page: formData.get("landing_page") as string,
+          decision_maker: formData.get("decision_maker") as string,
+          owner_email: formData.get("owner_email") as string,
+          phone: formData.get("phone") as string,
+          social_media: formData.get("social_media") as string,
+          owner_linkedin: formData.get("owner_linkedin") as string,
+          company_linkedin: formData.get("company_linkedin") as string,
+          company_email: formData.get("company_email") as string,
+          main_problem: formData.get("main_problem") as string,
+          service: formData.get("service") as string,
+          research_notes: formData.get("research_notes") as string,
+        })
+      ),
+      status: "New",
       follow_up_date:
         (formData.get("follow_up_date") as string) || null,
-      service_opportunity: formData.get("service_opportunity") as string,
-      research_notes: formData.get("research_notes") as string,
     });
 
     setLoading(false);
@@ -93,7 +147,7 @@ export default function NewLeadPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} onChange={handleFormChange} className="space-y-8">
 
               <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
                 <h2 className="mb-6 text-lg font-semibold">
@@ -206,24 +260,11 @@ export default function NewLeadPage() {
 
                   <div>
                     <label className="mb-2 block text-sm text-slate-300">
-                      Role
-                    </label>
-
-                    <input
-                      name="role"
-                      type="text"
-                      placeholder="Owner / Founder"
-                      className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none placeholder:text-slate-600 focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm text-slate-300">
                       Email
                     </label>
 
                     <input
-                      name="email"
+                      name="owner_email"
                       type="email"
                       placeholder="hello@example.com"
                       className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none placeholder:text-slate-600 focus:border-blue-500"
@@ -246,6 +287,35 @@ export default function NewLeadPage() {
                 </div>
               </div>
 
+              <div className="rounded-xl border border-slate-700 bg-slate-950 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm text-slate-400">
+                      Live Lead Score
+                    </p>
+                    <p className="mt-1 text-2xl font-bold">
+                      {liveScore}/100
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-slate-400">
+                      Priority
+                    </p>
+                    <p className="mt-1 text-lg font-semibold">
+                      {livePriority === "Hot" && "🔥 "}
+                      {livePriority === "Warm" && "🟡 "}
+                      {livePriority === "Low" && "🔵 "}
+                      {livePriority}
+                    </p>
+                  </div>
+                </div>
+
+                <p className="mt-3 text-xs text-slate-500">
+                  Score and priority update automatically as you add lead information.
+                </p>
+              </div>
+
               <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
                 <h2 className="mb-6 text-lg font-semibold">
                   🎯 Lead Qualification
@@ -266,23 +336,6 @@ export default function NewLeadPage() {
                       placeholder="85"
                       className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none placeholder:text-slate-600 focus:border-blue-500"
                     />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm text-slate-300">
-                      Priority
-                    </label>
-
-                    <select
-                      name="priority"
-                      defaultValue="Medium"
-                      className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"
-                    >
-                      <option>Medium</option>
-                      <option>Hot</option>
-                      <option>High</option>
-                      <option>Low</option>
-                    </select>
                   </div>
 
                   <div>
@@ -321,11 +374,11 @@ export default function NewLeadPage() {
 
                 <div className="mt-5">
                   <label className="mb-2 block text-sm text-slate-300">
-                    Service Opportunity
+                    Service
                   </label>
 
                   <input
-                    name="service_opportunity"
+                    name="service"
                     type="text"
                     placeholder="Landing Page, Website Redesign, CRO..."
                     className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none placeholder:text-slate-600 focus:border-blue-500"
