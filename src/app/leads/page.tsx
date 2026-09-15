@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { calculateLeadPriority } from "@/lib/lead-scoring";
 
 type Lead = {
   id: string;
@@ -17,26 +18,6 @@ type Lead = {
   created_at?: string | null;
 };
 
-function getPriority(score: number) {
-  if (score >= 17) {
-    return {
-      label: "Hot",
-      className: "bg-red-500/10 text-red-400 border-red-500/20",
-    };
-  }
-
-  if (score >= 13) {
-    return {
-      label: "Warm",
-      className: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-    };
-  }
-
-  return {
-    label: "Low",
-    className: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  };
-}
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -124,7 +105,7 @@ export default function LeadsPage() {
     if (priorityFilter !== "all") {
       result = result.filter((lead) => {
         const score = Number(lead.lead_score) || 0;
-        const priority = getPriority(score).label;
+        const priority = calculateLeadPriority(score);
 
         return priority === priorityFilter;
       });
@@ -424,8 +405,17 @@ export default function LeadsPage() {
                       const score =
                         Number(lead.lead_score) || 0;
 
-                      const priority =
-                        getPriority(score);
+                      const priorityLabel = calculateLeadPriority(score);
+
+                      const priority = {
+                        label: priorityLabel,
+                        className:
+                          priorityLabel === "Hot"
+                            ? "bg-red-500/10 text-red-400 border-red-500/20"
+                            : priorityLabel === "Warm"
+                              ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                              : "bg-blue-500/10 text-blue-400 border-blue-500/20",
+                      };
 
                       return (
                         <tr
