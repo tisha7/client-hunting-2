@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { calculateLeadPriority } from "@/lib/lead-scoring";
 
 type Lead = {
   id: string;
@@ -361,11 +362,30 @@ export default function LeadDetailsPage() {
     setCompletingFollowUp(true);
     setErrorMessage("");
 
+    const calculatedPriority = calculateLeadPriority(
+      Number(lead.lead_score) || 0
+    );
+
+    const followUpDays =
+      calculatedPriority === "Hot"
+        ? 2
+        : calculatedPriority === "Warm"
+          ? 4
+          : 7;
+
+    const nextFollowUp = new Date();
+    nextFollowUp.setDate(
+      nextFollowUp.getDate() + followUpDays
+    );
+
+    const nextFollowUpDate = nextFollowUp
+      .toISOString()
+      .split("T")[0];
+
     const { error: leadError } = await supabase
       .from("leads")
       .update({
-        follow_up_date: null,
-        status: "Contacted",
+        follow_up_date: nextFollowUpDate,
       })
       .eq("id", leadId);
 
@@ -381,7 +401,7 @@ export default function LeadDetailsPage() {
         .insert({
           lead_id: leadId,
           activity_type: "Follow-up Completed",
-          note: "Follow-up marked as completed.",
+          note: `Follow-up completed. Next follow-up scheduled for ${nextFollowUpDate} (${followUpDays} days based on ${calculatedPriority} priority).`,
         })
         .select()
         .single();
@@ -397,11 +417,10 @@ export default function LeadDetailsPage() {
 
     setLead({
       ...lead,
-      follow_up_date: null,
-      status: "Contacted",
+      follow_up_date: nextFollowUpDate,
     });
 
-    setFollowUpDate("");
+    setFollowUpDate(nextFollowUpDate);
 
     setCompletingFollowUp(false);
   }
